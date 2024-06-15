@@ -3,6 +3,7 @@ package org.example.view;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -48,6 +49,7 @@ public class RewindView extends VerticalLayout {
         configureForm();
 
         add(getToolbar(), getContent());
+        addBackgroundColor();
         updateList();
         closeEditor();
     }
@@ -85,23 +87,24 @@ public class RewindView extends VerticalLayout {
 
     @PostConstruct
     public void configureGrid() {
-        grid.addClassNames("rewind-grid");
+        grid.addClassName("styling");
+        grid.setColumnReorderingAllowed(true);
         grid.setSizeFull();
         grid.setColumns("sevenNumber", "fourNumber", "rack", "box", "rewinder");
 
-        grid.getColumnByKey("sevenNumber").setHeader("7 Number");
-        grid.getColumnByKey("fourNumber").setHeader("4 Number");
+        grid.getColumnByKey("sevenNumber").setHeader("7 Number").setResizable(true).setHeaderPartName("header");
+        grid.getColumnByKey("fourNumber").setHeader("4 Number").setResizable(true).setHeaderPartName("header");
         grid.addColumn(order -> order.getCustomer() != null ? order.getCustomer().getName() : "")
-                .setHeader("Customer");
+                .setHeader("Customer").setResizable(true).setHeaderPartName("header");
         grid.addColumn(order -> order.getDescription() != null ? order.getDescription().getName() : "")
-                .setHeader("Description");
+                .setHeader("Description").setResizable(true).setHeaderPartName("header");
         grid.addColumn(order -> order.getOldDescription() != null ? order.getOldDescription().getName() : "")
-                .setHeader("Old Description");
-        grid.getColumnByKey("rack").setHeader("Rack");
-        grid.getColumnByKey("box").setHeader("Box");
-        grid.getColumnByKey("rewinder").setHeader("Rewinder");
+                .setHeader("Old Description").setResizable(true).setHeaderPartName("header");
+        grid.getColumnByKey("rack").setHeader("Rack").setResizable(true).setHeaderPartName("header");
+        grid.getColumnByKey("box").setHeader("Box").setResizable(true).setHeaderPartName("header");
+        grid.getColumnByKey("rewinder").setHeader("Rewinder").setResizable(true).setHeaderPartName("header");
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
-
+        grid.addThemeVariants(GridVariant.LUMO_COMPACT);
         grid.asSingleSelect().addValueChangeListener(event ->
                 editRewindOrder(event.getValue()));
 
@@ -148,6 +151,17 @@ public class RewindView extends VerticalLayout {
 
     private void updateList() {
         grid.setItems(service.findAllRewindOrders(filterText.getValue()));
+    }
+
+    private void addBackgroundColor() {
+        grid.setPartNameGenerator(order -> {
+            if (order.getColor() != null) {
+                String color = order.getColor().toString();
+                System.out.println("Rewind order: " + order.toString() + " color: " + color);
+                return color;
+            }
+            return null;
+        });
     }
 
     private void printGrid() {

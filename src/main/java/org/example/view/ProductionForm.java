@@ -43,6 +43,7 @@ public class ProductionForm extends FormLayout {
     private DatePicker customerDate = new DatePicker("Customer date");
     private ComboBox<InfosheetsOption> infosheets = new ComboBox<>("Infosheets");
     private TextField catalog = new TextField("Catalog");
+    private ComboBox<ColorOption> color = new ComboBox<>("Color");
     ComboBox<ProductionOrder> productionOrder = new ComboBox<>("Production Order");
 
     Button save = new Button("Save");
@@ -75,6 +76,11 @@ public class ProductionForm extends FormLayout {
         ml.setItemLabelGenerator(MLOption::toString); // Use the enum's toString method for display
         add(ml);
 
+        color.setItems(Arrays.asList(ColorOption.values()));
+        color.setLabel("Color");
+        color.setItemLabelGenerator(ColorOption::toString);
+        add(color);
+
         infosheets.setItems(Arrays.asList(InfosheetsOption.values())); // Set enum values as items
         infosheets.setLabel("Infosheets"); // Set label for the ComboBox
         infosheets.setItemLabelGenerator(InfosheetsOption::toString); // Use the enum's toString method for display
@@ -100,6 +106,7 @@ public class ProductionForm extends FormLayout {
                 customerDate,
                 infosheets,
                 catalog,
+                color,
                 createButtonsLayout());
 
         binder.forField(description).bind(ProductionOrder::getDescription, ProductionOrder::setDescription);

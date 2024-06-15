@@ -11,24 +11,22 @@ public class Orders {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(name = "seven_number")
     private String sevenNumber;
-
     @Column(name = "four_number")
     private String fourNumber;
-
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
-
     @ManyToOne
     @JoinColumn(name = "description_id")
     private Description description;
-
     @ManyToOne
     @JoinColumn(name = "oldDescription_id")
     private OldDescription oldDescription;
+    @Column(name = "color")
+    @Enumerated(EnumType.STRING)
+    private ColorOption color;
 
     // Getters and Setters
     public Long getId() {
@@ -77,5 +75,13 @@ public class Orders {
 
     public void setOldDescription(OldDescription oldDescription) {
         this.oldDescription = oldDescription;
+    }
+
+    public ColorOption getColor() {
+        return color;
+    }
+
+    public void setColor(ColorOption color) {
+        this.color = color;
     }
 }

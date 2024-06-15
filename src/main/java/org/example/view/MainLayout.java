@@ -18,6 +18,7 @@ import java.util.Locale;
 public class MainLayout extends AppLayout {
 
     public MainLayout() {
+        UI.getCurrent().getPage().addStyleSheet("/frontend/grid-styling.css");
         createHeader();
         createDrawer();
     }

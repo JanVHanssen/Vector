@@ -35,6 +35,7 @@ public class RewindForm extends FormLayout {
     private TextField rack = new TextField("Rack");
     private ComboBox<BoxOption> box = new ComboBox<>("Box", Arrays.asList(BoxOption.values()));
     private ComboBox<RewinderOption> rewindComboBox = new ComboBox<>("Rewinder", Arrays.asList(RewinderOption.values()));
+    private ComboBox<ColorOption> color = new ComboBox<>("Color");
     ComboBox<RewindOrder> rewindOrder = new ComboBox<>("Rewind Order");
 
     Button save = new Button("Save");
@@ -59,6 +60,11 @@ public class RewindForm extends FormLayout {
         customer.setItemLabelGenerator(Customer::getName);
         add(customer);
 
+        color.setItems(Arrays.asList(ColorOption.values()));
+        color.setLabel("Color");
+        color.setItemLabelGenerator(ColorOption::toString);
+        add(color);
+
         binder.forField(rewindComboBox)
                 .bind(RewindOrder::getRewinder, RewindOrder::setRewinder);
         rewindOrder.setItems(rewindOrders);
@@ -72,6 +78,7 @@ public class RewindForm extends FormLayout {
                 rack,
                 box,
                 rewindComboBox,
+                color,
                 createButtonsLayout());
 
         // Bind the customer field to the ProductionOrder
