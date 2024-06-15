@@ -14,7 +14,9 @@ public interface RewindOrderRepository extends JpaRepository<RewindOrder, Long> 
     @Query("select c from RewindOrder c " +
             "where lower(cast(c.sevenNumber as string)) like lower(concat('%', :searchTerm, '%')) " +
             "or lower(cast(c.fourNumber as string)) like lower(concat('%', :searchTerm, '%')) " +
-            "or lower(cast(c.customer as string)) like lower(concat('%', :searchTerm, '%')) " +
-            "or lower(cast(c.description as string)) like lower(concat('%', :searchTerm, '%')) ")
+            "or lower(cast(c.customer.name as string)) like lower(concat('%', :searchTerm, '%')) " +
+            "or lower(cast(c.description.name as string)) like lower(concat('%', :searchTerm, '%')) " +
+            "or lower(cast(c.rewinder as string)) like lower(concat('%', :searchTerm, '%')) " +
+            "or lower(cast(c.rack as string)) like lower(concat('%', :searchTerm, '%'))")
     List<RewindOrder> search(@Param("searchTerm") String searchTerm);
 }

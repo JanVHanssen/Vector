@@ -108,6 +108,7 @@ public class RewindView extends VerticalLayout {
         grid.asSingleSelect().addValueChangeListener(event ->
                 editRewindOrder(event.getValue()));
 
+
     }
 
     private Component getToolbar() {
