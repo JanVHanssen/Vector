@@ -14,8 +14,7 @@ public class ProductionOrder extends Orders {
 
     @Column(name = "sequence")
     private String sequence;
-    @Column(name = "amount")
-    private String amount;
+
     @Column(name = "sales_order")
     private String salesOrder;
     @Column(name = "so_line")
@@ -46,14 +45,6 @@ public class ProductionOrder extends Orders {
 
     public void setSequence(String sequence) {
         this.sequence = sequence;
-    }
-
-    public String getAmount() {
-        return amount;
-    }
-
-    public void setAmount(String amount) {
-        this.amount = amount;
     }
 
     public String getSalesOrder() {

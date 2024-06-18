@@ -15,6 +15,8 @@ public class Orders {
     private String sevenNumber;
     @Column(name = "four_number")
     private String fourNumber;
+    @Column(name = "amount")
+    private String amount;
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
@@ -83,5 +85,13 @@ public class Orders {
 
     public void setColor(ColorOption color) {
         this.color = color;
+    }
+
+    public String getAmount() {
+        return amount;
+    }
+
+    public void setAmount(String amount) {
+        this.amount = amount;
     }
 }

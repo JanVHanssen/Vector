@@ -8,6 +8,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -32,7 +33,9 @@ public class RewindForm extends FormLayout {
     private ComboBox<Customer> customer = new ComboBox<>("Customer");
     private ComboBox<Description> description = new ComboBox<>("Description");
     private ComboBox<OldDescription> oldDescription = new ComboBox<>("Old Description");
+    private TextField amount = new TextField("Amount");
     private TextField rack = new TextField("Rack");
+    private DatePicker date = new DatePicker("Date");
     private ComboBox<BoxOption> box = new ComboBox<>("Box", Arrays.asList(BoxOption.values()));
     private ComboBox<RewinderOption> rewindComboBox = new ComboBox<>("Rewinder", Arrays.asList(RewinderOption.values()));
     private ComboBox<ColorOption> color = new ComboBox<>("Color");
@@ -75,8 +78,10 @@ public class RewindForm extends FormLayout {
                 customer,
                 description,
                 oldDescription,
+                amount,
                 rack,
                 box,
+                date,
                 rewindComboBox,
                 color,
                 createButtonsLayout());

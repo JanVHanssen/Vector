@@ -3,6 +3,7 @@ package org.example.view;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -14,8 +15,6 @@ import org.example.model.OldDescription;
 import org.example.service.OldDescriptionService;
 import org.springframework.context.annotation.Scope;
 
-@SpringComponent
-@Scope("prototype")
 @PermitAll
 @Route(value = "oldDescriptions", layout = MainLayout.class)
 @PageTitle("Old Descriptions | Vector Hasselt")
@@ -23,6 +22,7 @@ public class OldDescriptionView extends VerticalLayout {
     private Grid<OldDescription> grid = new Grid<>(OldDescription.class);
     private TextField name = new TextField("Name");
     private OldDescriptionService oldDescriptionService;
+    private OldDescription currentOldDescription;
 
     public OldDescriptionView(OldDescriptionService oldDescriptionService) {
         this.oldDescriptionService = oldDescriptionService;
@@ -48,14 +48,17 @@ public class OldDescriptionView extends VerticalLayout {
         Button save = new Button("Save");
         Button update = new Button("Update");
         Button delete = new Button("Delete");
+        Button cancel = new Button("Cancel");
 
         save.addClickListener(e -> saveOldDescription());
         update.addClickListener(e -> updateOldDescription());
         delete.addClickListener(e -> deleteOldDescription());
+        cancel.addClickListener(e -> closeEditor());
 
-        HorizontalLayout buttonsLayout = new HorizontalLayout(save, update, delete);
+        HorizontalLayout buttonsLayout = new HorizontalLayout(save, update, delete, cancel);
         add(formLayout, buttonsLayout);
     }
+
     private HorizontalLayout getContent() {
         HorizontalLayout content = new HorizontalLayout(grid);
         content.setSizeFull();
@@ -66,43 +69,57 @@ public class OldDescriptionView extends VerticalLayout {
         grid.setItems(oldDescriptionService.findAllOldDescriptions());
     }
 
-
     private void editOldDescription(OldDescription oldDescription) {
         if (oldDescription == null) {
             closeEditor();
         } else {
+            currentOldDescription = oldDescription;
             name.setValue(oldDescription.getName());
         }
     }
 
     private void saveOldDescription() {
-        OldDescription oldDescription = new OldDescription();
-        oldDescription.setName(name.getValue());
-        oldDescriptionService.saveOldDescription(oldDescription);
-        updateList();
-        closeEditor();
+        if (currentOldDescription == null) {
+            currentOldDescription = new OldDescription();
+        }
+        currentOldDescription.setName(name.getValue());
+        try {
+            oldDescriptionService.saveOldDescription(currentOldDescription);
+            updateList();
+            closeEditor();
+        } catch (IllegalArgumentException e) {
+            Notification.show("Old name already exists", 3000, Notification.Position.MIDDLE);
+        }
     }
 
     private void updateOldDescription() {
-        OldDescription selectedOldDescription = grid.asSingleSelect().getValue();
-        if (selectedOldDescription != null) {
-            selectedOldDescription.setName(name.getValue());
-            oldDescriptionService.saveOldDescription(selectedOldDescription);
-            updateList();
-            closeEditor();
+        if (currentOldDescription != null) {
+            currentOldDescription.setName(name.getValue());
+            try {
+                oldDescriptionService.saveOldDescription(currentOldDescription);
+                updateList();
+                closeEditor();
+            } catch (IllegalArgumentException e) {
+                Notification.show("Old name already exists", 3000, Notification.Position.MIDDLE);
+            }
         }
     }
 
     private void deleteOldDescription() {
         OldDescription selectedOldDescription = grid.asSingleSelect().getValue();
         if (selectedOldDescription != null) {
-            oldDescriptionService.deleteOldDescription(selectedOldDescription);
-            updateList();
-            closeEditor();
+            try {
+                oldDescriptionService.deleteOldDescription(selectedOldDescription);
+                updateList();
+                closeEditor();
+            } catch (IllegalStateException e) {
+                Notification.show("Cannot delete old description with existing orders", 3000, Notification.Position.MIDDLE);
+            }
         }
     }
 
     private void closeEditor() {
         name.clear();
+        currentOldDescription = null;
     }
 }

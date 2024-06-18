@@ -11,6 +11,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -90,8 +91,9 @@ public class RewindView extends VerticalLayout {
         grid.addClassName("styling");
         grid.setColumnReorderingAllowed(true);
         grid.setSizeFull();
-        grid.setColumns("sevenNumber", "fourNumber", "rack", "box", "rewinder");
+        grid.setColumns("rack", "sevenNumber", "fourNumber", "amount", "box", "rewinder");
 
+        grid.getColumnByKey("rack").setHeader("Rack").setResizable(true).setHeaderPartName("header");
         grid.getColumnByKey("sevenNumber").setHeader("7 Number").setResizable(true).setHeaderPartName("header");
         grid.getColumnByKey("fourNumber").setHeader("4 Number").setResizable(true).setHeaderPartName("header");
         grid.addColumn(order -> order.getCustomer() != null ? order.getCustomer().getName() : "")
@@ -100,15 +102,16 @@ public class RewindView extends VerticalLayout {
                 .setHeader("Description").setResizable(true).setHeaderPartName("header");
         grid.addColumn(order -> order.getOldDescription() != null ? order.getOldDescription().getName() : "")
                 .setHeader("Old Description").setResizable(true).setHeaderPartName("header");
-        grid.getColumnByKey("rack").setHeader("Rack").setResizable(true).setHeaderPartName("header");
+        grid.getColumnByKey("amount").setHeader("Amount").setResizable(true).setHeaderPartName("header");
         grid.getColumnByKey("box").setHeader("Box").setResizable(true).setHeaderPartName("header");
         grid.getColumnByKey("rewinder").setHeader("Rewinder").setResizable(true).setHeaderPartName("header");
+        grid.addColumn(new LocalDateRenderer<>(RewindOrder::getDate, "dd/MM/yyyy"))
+                .setHeader("Date").setResizable(true).setHeaderPartName("header");
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
+
         grid.addThemeVariants(GridVariant.LUMO_COMPACT);
         grid.asSingleSelect().addValueChangeListener(event ->
                 editRewindOrder(event.getValue()));
-
-
     }
 
     private Component getToolbar() {

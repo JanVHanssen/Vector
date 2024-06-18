@@ -1,7 +1,6 @@
 package org.example.repository;
 
-import org.example.model.ProductionOrder;
-import org.example.model.RewindOrder;
+import org.example.model.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +18,8 @@ public interface RewindOrderRepository extends JpaRepository<RewindOrder, Long> 
             "or lower(cast(c.rewinder as string)) like lower(concat('%', :searchTerm, '%')) " +
             "or lower(cast(c.rack as string)) like lower(concat('%', :searchTerm, '%'))")
     List<RewindOrder> search(@Param("searchTerm") String searchTerm);
+
+    boolean existsByCustomer(Customer customer);
+    boolean existsByDescription(Description description);
+    boolean existsByOldDescription(OldDescription oldDescription);
 }

@@ -3,6 +3,7 @@ package org.example.view;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -15,8 +16,6 @@ import org.example.model.Description;
 import org.example.service.CustomerService;
 import org.springframework.context.annotation.Scope;
 
-@SpringComponent
-@Scope("prototype")
 @PermitAll
 @Route(value = "customers", layout = MainLayout.class)
 @PageTitle("Customers | Vector Hasselt")
@@ -26,6 +25,7 @@ public class CustomerView extends VerticalLayout {
     private TextField email = new TextField("Email");
     private TextField phone = new TextField("Phone");
     private CustomerService customerService;
+    private Customer currentCustomer;
 
     public CustomerView(CustomerService customerService) {
         this.customerService = customerService;
@@ -52,12 +52,14 @@ public class CustomerView extends VerticalLayout {
         Button save = new Button("Save");
         Button update = new Button("Update");
         Button delete = new Button("Delete");
+        Button cancel = new Button("Cancel");
 
         save.addClickListener(e -> saveCustomer());
         update.addClickListener(e -> updateCustomer());
         delete.addClickListener(e -> deleteCustomer());
+        cancel.addClickListener(e -> closeEditor());
 
-        HorizontalLayout buttonsLayout = new HorizontalLayout(save, update, delete);
+        HorizontalLayout buttonsLayout = new HorizontalLayout(save, update, delete, cancel);
         add(formLayout, buttonsLayout);
     }
 
@@ -71,15 +73,11 @@ public class CustomerView extends VerticalLayout {
         grid.setItems(customerService.findAllCustomers());
     }
 
-    private void addCustomer() {
-        grid.asSingleSelect().clear();
-        editCustomer(new Customer());
-    }
-
     private void editCustomer(Customer customer) {
         if (customer == null) {
             closeEditor();
         } else {
+            currentCustomer = customer;
             name.setValue(customer.getName());
             email.setValue(customer.getEmail());
             phone.setValue(customer.getPhone());
@@ -87,33 +85,46 @@ public class CustomerView extends VerticalLayout {
     }
 
     private void saveCustomer() {
-        Customer customer = new Customer();
-        customer.setName(name.getValue());
-        customer.setEmail(email.getValue());
-        customer.setPhone(phone.getValue());
-        customerService.saveCustomer(customer);
-        updateList();
-        closeEditor();
+        if (currentCustomer == null) {
+            currentCustomer = new Customer();
+        }
+        currentCustomer.setName(name.getValue());
+        currentCustomer.setEmail(email.getValue());
+        currentCustomer.setPhone(phone.getValue());
+        try {
+            customerService.saveCustomer(currentCustomer);
+            updateList();
+            closeEditor();
+        } catch (IllegalArgumentException e) {
+            Notification.show("Customer already exists", 3000, Notification.Position.MIDDLE);
+        }
     }
 
     private void updateCustomer() {
-        Customer selectedCustomer = grid.asSingleSelect().getValue();
-        if (selectedCustomer != null) {
-            selectedCustomer.setName(name.getValue());
-            selectedCustomer.setEmail(email.getValue());
-            selectedCustomer.setPhone(phone.getValue());
-            customerService.saveCustomer(selectedCustomer);
-            updateList();
-            closeEditor();
+        if (currentCustomer != null) {
+            currentCustomer.setName(name.getValue());
+            currentCustomer.setEmail(email.getValue());
+            currentCustomer.setPhone(phone.getValue());
+            try {
+                customerService.saveCustomer(currentCustomer);
+                updateList();
+                closeEditor();
+            } catch (IllegalArgumentException e) {
+                Notification.show("Customer already exists", 3000, Notification.Position.MIDDLE);
+            }
         }
     }
 
     private void deleteCustomer() {
         Customer selectedCustomer = grid.asSingleSelect().getValue();
         if (selectedCustomer != null) {
-            customerService.deleteCustomer(selectedCustomer);
-            updateList();
-            closeEditor();
+            try {
+                customerService.deleteCustomer(selectedCustomer);
+                updateList();
+                closeEditor();
+            } catch (IllegalStateException e) {
+                Notification.show("Cannot delete customer with existing orders", 3000, Notification.Position.MIDDLE);
+            }
         }
     }
 
@@ -121,5 +132,6 @@ public class CustomerView extends VerticalLayout {
         name.clear();
         email.clear();
         phone.clear();
+        currentCustomer = null;
     }
 }
