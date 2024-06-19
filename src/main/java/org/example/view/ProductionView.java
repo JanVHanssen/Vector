@@ -5,7 +5,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -13,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
@@ -47,6 +50,7 @@ public class ProductionView extends VerticalLayout {
     private CustomerService customerService;
     private DescriptionService descriptionService;
     private OldDescriptionService oldDescriptionService;
+    private FooterRow footerRow;
 
     @Autowired
     public ProductionView(ProductionOrderService service, CustomerService customerService, DescriptionService descriptionService, OldDescriptionService oldDescriptionService) {
@@ -108,7 +112,7 @@ public class ProductionView extends VerticalLayout {
 
         // Set columns including all fields
         grid.setColumns(
-                "sequence", "sevenNumber", "fourNumber", "amount",
+                "sequence", "sevenNumber", "fourNumber",
                 "salesOrder", "soLine", "ml",
                 "reelLength", "infosheets", "catalog"
         );
@@ -119,7 +123,10 @@ public class ProductionView extends VerticalLayout {
         grid.getColumnByKey("fourNumber").setHeader("4 Number").setResizable(true).setHeaderPartName("header");
         grid.addColumn(order -> order.getDescription() != null ? order.getDescription().getName() : "")
                 .setHeader("Description").setResizable(true).setHeaderPartName("header");
-        grid.getColumnByKey("amount").setHeader("Amount").setResizable(true).setHeaderPartName("header");
+        grid.addColumn(new ComponentRenderer<>(order -> {
+            String formattedAmount = String.format("%,.0f", order.getAmount());
+            return new Span(formattedAmount);
+        })).setHeader("Amount").setKey("amount").setResizable(true).setHeaderPartName("header");
         grid.getColumnByKey("salesOrder").setHeader("Sales Order").setResizable(true).setHeaderPartName("header");
         grid.getColumnByKey("soLine").setHeader("SO Line").setResizable(true).setHeaderPartName("header");
         grid.addColumn(new LocalDateRenderer<>(ProductionOrder::getRequestedDate, "dd/MM/yyyy"))
@@ -139,15 +146,12 @@ public class ProductionView extends VerticalLayout {
         grid.getColumnByKey("infosheets").setHeader("Infosheets").setResizable(true).setHeaderPartName("header");
         grid.getColumnByKey("catalog").setHeader("Catalog").setResizable(true).setHeaderPartName("header");
 
-        // Set auto-width for columns
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
+        footerRow = grid.appendFooterRow();
+
+        updateFooter();
         grid.addThemeVariants(GridVariant.LUMO_COMPACT);
 
-
-
-
-
-        // Add value change listener
         grid.asSingleSelect().addValueChangeListener(event ->
                 editProductionOrder(event.getValue()));
     }
@@ -191,9 +195,9 @@ public class ProductionView extends VerticalLayout {
     }
 
     private void updateList() {
-        List<ProductionOrder> orders = service.findAllProductionOrders();
-        grid.setItems(orders);
-
+       
+        grid.setItems(service.findAllProductionOrders(filterText.getValue()));
+        updateFooter();
     }
 
     private void addBackgroundColor() {
@@ -207,6 +211,15 @@ public class ProductionView extends VerticalLayout {
         });
     }
 
+    private void updateFooter() {
+        List<ProductionOrder> orders = service.findAllProductionOrders(filterText.getValue());
+        double totalAmount = orders.stream()
+                .mapToDouble(ProductionOrder::getAmount)
+                .sum();
+
+        String formattedAmount = String.format("%,.0f", totalAmount);
+        footerRow.getCell(this.grid.getColumnByKey("amount")).setText(formattedAmount);
+    }
     private void printGrid() {
         // Logic for printing the grid
         Notification.show("Printing grid...");

@@ -16,7 +16,7 @@ public class Orders {
     @Column(name = "four_number")
     private String fourNumber;
     @Column(name = "amount")
-    private String amount;
+    private Double amount;
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
@@ -87,11 +87,11 @@ public class Orders {
         this.color = color;
     }
 
-    public String getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(String amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 }

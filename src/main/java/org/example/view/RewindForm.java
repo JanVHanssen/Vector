@@ -10,6 +10,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -85,6 +86,7 @@ public class RewindForm extends FormLayout {
                 rewindComboBox,
                 color,
                 createButtonsLayout());
+
 
         // Bind the customer field to the ProductionOrder
         binder.forField(customer).bind(RewindOrder::getCustomer, RewindOrder::setCustomer);

@@ -2,16 +2,20 @@ package org.example.view;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
+import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -24,20 +28,21 @@ import org.springframework.context.annotation.Scope;
 
 import java.util.List;
 
-@SpringComponent
-@Scope("prototype")
-@PermitAll
 @Route(value = "rewind", layout = MainLayout.class)
 @PageTitle("Halfstock | Vector Hasselt")
+@Scope("prototype")
+@PermitAll
+@SpringComponent
 public class RewindView extends VerticalLayout {
 
     private Grid<RewindOrder> grid = new Grid<>(RewindOrder.class);
-    TextField filterText = new TextField();
-    RewindForm form;
-    RewindOrderService service;
+    private TextField filterText = new TextField();
+    private RewindForm form;
+    private RewindOrderService service;
     private CustomerService customerService;
     private DescriptionService descriptionService;
     private OldDescriptionService oldDescriptionService;
+    private FooterRow footerRow;
 
     public RewindView(RewindOrderService service, CustomerService customerService, DescriptionService descriptionService, OldDescriptionService oldDescriptionService) {
         this.service = service;
@@ -54,6 +59,7 @@ public class RewindView extends VerticalLayout {
         updateList();
         closeEditor();
     }
+
     private HorizontalLayout getContent() {
         HorizontalLayout content = new HorizontalLayout(grid, form);
         content.setFlexGrow(2, grid);
@@ -69,9 +75,9 @@ public class RewindView extends VerticalLayout {
         List<OldDescription> oldDescriptions = oldDescriptionService.findAllOldDescriptions();
         form = new RewindForm(service.findAllRewindOrders(), customers, descriptions, oldDescriptions);
         form.setWidth("25em");
-        form.addSaveListener(this::saveRewindOrder); // <1>
-        form.addDeleteListener(this::deleteRewindOrder); // <2>
-        form.addCloseListener(e -> closeEditor()); // <3>
+        form.addSaveListener(this::saveRewindOrder);
+        form.addDeleteListener(this::deleteRewindOrder);
+        form.addCloseListener(e -> closeEditor());
     }
 
     private void saveRewindOrder(RewindForm.SaveEvent event) {
@@ -91,7 +97,9 @@ public class RewindView extends VerticalLayout {
         grid.addClassName("styling");
         grid.setColumnReorderingAllowed(true);
         grid.setSizeFull();
-        grid.setColumns("rack", "sevenNumber", "fourNumber", "amount", "box", "rewinder");
+
+        // Remove the default amount column
+        grid.setColumns("rack", "sevenNumber", "fourNumber");
 
         grid.getColumnByKey("rack").setHeader("Rack").setResizable(true).setHeaderPartName("header");
         grid.getColumnByKey("sevenNumber").setHeader("7 Number").setResizable(true).setHeaderPartName("header");
@@ -102,17 +110,30 @@ public class RewindView extends VerticalLayout {
                 .setHeader("Description").setResizable(true).setHeaderPartName("header");
         grid.addColumn(order -> order.getOldDescription() != null ? order.getOldDescription().getName() : "")
                 .setHeader("Old Description").setResizable(true).setHeaderPartName("header");
-        grid.getColumnByKey("amount").setHeader("Amount").setResizable(true).setHeaderPartName("header");
-        grid.getColumnByKey("box").setHeader("Box").setResizable(true).setHeaderPartName("header");
-        grid.getColumnByKey("rewinder").setHeader("Rewinder").setResizable(true).setHeaderPartName("header");
+
+        grid.addColumn(RewindOrder::getBox)
+                .setHeader("Box").setResizable(true).setHeaderPartName("header");
+        grid.addColumn(RewindOrder::getRewinder)
+                .setHeader("Rewinder").setResizable(true).setHeaderPartName("header");
+
+        grid.addColumn(new ComponentRenderer<>(order -> {
+            String formattedAmount = String.format("%,.0f", order.getAmount());
+            return new Span(formattedAmount);
+        })).setHeader("Amount").setKey("amount").setResizable(true).setHeaderPartName("header");
+
         grid.addColumn(new LocalDateRenderer<>(RewindOrder::getDate, "dd/MM/yyyy"))
                 .setHeader("Date").setResizable(true).setHeaderPartName("header");
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
+        footerRow = grid.appendFooterRow();
+
+        updateFooter();
 
         grid.addThemeVariants(GridVariant.LUMO_COMPACT);
         grid.asSingleSelect().addValueChangeListener(event ->
                 editRewindOrder(event.getValue()));
+
     }
+
 
     private Component getToolbar() {
         filterText.setPlaceholder("Filter by name...");
@@ -152,9 +173,9 @@ public class RewindView extends VerticalLayout {
         editRewindOrder(new RewindOrder());
     }
 
-
     private void updateList() {
         grid.setItems(service.findAllRewindOrders(filterText.getValue()));
+        updateFooter();
     }
 
     private void addBackgroundColor() {
@@ -168,6 +189,15 @@ public class RewindView extends VerticalLayout {
         });
     }
 
+private void updateFooter() {
+    List<RewindOrder> orders = service.findAllRewindOrders(filterText.getValue());
+    double totalAmount = orders.stream()
+            .mapToDouble(RewindOrder::getAmount)
+            .sum();
+
+    String formattedAmount = String.format("%,.0f", totalAmount);
+    footerRow.getCell(this.grid.getColumnByKey("amount")).setText(formattedAmount);
+}
     private void printGrid() {
         // Logic for printing the grid
         Notification.show("Printing grid...");
