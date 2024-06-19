@@ -25,6 +25,7 @@ import jakarta.annotation.security.PermitAll;
 import org.example.model.*;
 import org.example.service.*;
 import org.springframework.context.annotation.Scope;
+import software.xdev.vaadin.grid_exporter.GridExporter;
 
 import java.util.List;
 
@@ -98,7 +99,6 @@ public class RewindView extends VerticalLayout {
         grid.setColumnReorderingAllowed(true);
         grid.setSizeFull();
 
-        // Remove the default amount column
         grid.setColumns("rack", "sevenNumber", "fourNumber");
 
         grid.getColumnByKey("rack").setHeader("Rack").setResizable(true).setHeaderPartName("header");
@@ -199,9 +199,8 @@ private void updateFooter() {
     footerRow.getCell(this.grid.getColumnByKey("amount")).setText(formattedAmount);
 }
     private void printGrid() {
-        // Logic for printing the grid
-        Notification.show("Printing grid...");
-        Page page = this.getUI().get().getPage();
-        page.executeJs("window.print()");
+        GridExporter
+                .newWithDefaults(grid)
+                .open();
     }
 }

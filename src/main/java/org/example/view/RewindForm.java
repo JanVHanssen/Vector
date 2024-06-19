@@ -59,7 +59,6 @@ public class RewindForm extends FormLayout {
         oldDescription.setItemLabelGenerator(OldDescription::getName);
         add(oldDescription);
 
-        // Initialize the ComboBox with the list of customers
         customer.setItems(customers);
         customer.setItemLabelGenerator(Customer::getName);
         add(customer);
@@ -87,8 +86,6 @@ public class RewindForm extends FormLayout {
                 color,
                 createButtonsLayout());
 
-
-        // Bind the customer field to the ProductionOrder
         binder.forField(customer).bind(RewindOrder::getCustomer, RewindOrder::setCustomer);
         binder.forField(description).bind(RewindOrder::getDescription, RewindOrder::setDescription);
         binder.forField(oldDescription).bind(RewindOrder::getOldDescription, RewindOrder::setOldDescription);
@@ -116,12 +113,10 @@ public class RewindForm extends FormLayout {
         }
     }
 
-
     public void setRewindOrder(RewindOrder rewindOrder) {
         binder.setBean(rewindOrder); // <1>
     }
 
-    // Events
     public static abstract class RewindFormEvent extends ComponentEvent<RewindForm> {
         private RewindOrder rewindOrder;
 

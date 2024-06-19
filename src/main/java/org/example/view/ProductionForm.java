@@ -66,14 +66,13 @@ public class ProductionForm extends FormLayout {
         oldDescription.setItemLabelGenerator(OldDescription::getName);
         add(oldDescription);
 
-        // Initialize the ComboBox with the list of customers
         customer.setItems(customers);
         customer.setItemLabelGenerator(Customer::getName);
         add(customer);
 
-        ml.setItems(Arrays.asList(MLOption.values())); // Set enum values as items
-        ml.setLabel("ML"); // Set label for the ComboBox
-        ml.setItemLabelGenerator(MLOption::toString); // Use the enum's toString method for display
+        ml.setItems(Arrays.asList(MLOption.values()));
+        ml.setLabel("ML");
+        ml.setItemLabelGenerator(MLOption::toString);
         add(ml);
 
         color.setItems(Arrays.asList(ColorOption.values()));
@@ -139,15 +138,12 @@ public class ProductionForm extends FormLayout {
         binder.setBean(productionOrder);
     }
 
-    // Events
     public static abstract class ProductionFormEvent extends ComponentEvent<ProductionForm> {
         private ProductionOrder productionOrder;
-
         protected ProductionFormEvent(ProductionForm source, ProductionOrder productionOrder) {
             super(source, false);
             this.productionOrder = productionOrder;
         }
-
         public ProductionOrder getProductionOrder() {
             return productionOrder;
         }
@@ -163,7 +159,6 @@ public class ProductionForm extends FormLayout {
         DeleteEvent(ProductionForm source, ProductionOrder productionOrder) {
             super(source, productionOrder);
         }
-
     }
 
     public static class CloseEvent extends ProductionForm.ProductionFormEvent {

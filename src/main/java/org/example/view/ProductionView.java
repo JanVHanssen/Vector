@@ -36,6 +36,7 @@ import org.example.service.ProductionOrderService;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import software.xdev.vaadin.grid_exporter.GridExporter;
 
 @UIScope
 @PermitAll
@@ -109,15 +110,12 @@ public class ProductionView extends VerticalLayout {
         grid.setColumnReorderingAllowed(true);
         grid.setSizeFull();
 
-
-        // Set columns including all fields
         grid.setColumns(
                 "sequence", "sevenNumber", "fourNumber",
                 "salesOrder", "soLine", "ml",
                 "reelLength", "infosheets", "catalog"
         );
 
-        // Set headers for non-date fields
         grid.getColumnByKey("sequence").setHeader("Sequence").setResizable(true).setHeaderPartName("header");
         grid.getColumnByKey("sevenNumber").setHeader("7 Number").setResizable(true).setHeaderPartName("header");
         grid.getColumnByKey("fourNumber").setHeader("4 Number").setResizable(true).setHeaderPartName("header");
@@ -221,10 +219,9 @@ public class ProductionView extends VerticalLayout {
         footerRow.getCell(this.grid.getColumnByKey("amount")).setText(formattedAmount);
     }
     private void printGrid() {
-        // Logic for printing the grid
-        Notification.show("Printing grid...");
-        Page page = this.getUI().get().getPage();
-        page.executeJs("window.print()");
+        GridExporter
+                .newWithDefaults(grid)
+                .open();
     }
 
 

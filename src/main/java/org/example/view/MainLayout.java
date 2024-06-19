@@ -29,7 +29,6 @@ public class MainLayout extends AppLayout {
                 LumoUtility.FontSize.LARGE,
                 LumoUtility.Margin.MEDIUM);
 
-
         var header = new HorizontalLayout(new DrawerToggle(), logo);
 
         header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
@@ -40,7 +39,6 @@ public class MainLayout extends AppLayout {
                 LumoUtility.Padding.Horizontal.MEDIUM);
 
         addToNavbar(header);
-
     }
 
     private void createDrawer() {
